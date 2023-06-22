@@ -1,4 +1,5 @@
 {-# LANGUAGE PatternSynonyms #-}
+{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 
 module Plutarch.Pretty (prettyTerm, prettyTerm', prettyScript) where
 

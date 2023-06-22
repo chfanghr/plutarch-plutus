@@ -17,6 +17,7 @@ module Plutarch.FFI (
 ) where
 
 import Control.Lens (over)
+import Control.Monad (void)
 import Data.Kind (Constraint, Type)
 import Data.Proxy (Proxy (Proxy))
 import Data.Text qualified as T
@@ -117,7 +118,7 @@ opaqueImport = unsafeForeignImport
 
 -- | Seriously unsafe, may fail at run time or result in unexpected behaviour in your on-chain validator.
 unsafeForeignExport :: Config -> ClosedTerm p -> CompiledCode t
-unsafeForeignExport config t = DeserializedCode program Nothing mempty
+unsafeForeignExport config t = DeserializedCode (fmap (const mempty) program) Nothing mempty
   where
     (Script (UPLC.Program _ version term)) = either (error . T.unpack) id $ compile config t
     program =
@@ -126,7 +127,7 @@ unsafeForeignExport config t = DeserializedCode program Nothing mempty
 
 -- | Seriously unsafe, may fail at run time or result in unexpected behaviour in your on-chain validator.
 unsafeForeignImport :: CompiledCode t -> ClosedTerm p
-unsafeForeignImport c = Term $ const $ pure $ TermResult (RCompiled $ UPLC._progTerm $ toNameless $ getPlc c) []
+unsafeForeignImport c = Term $ const $ pure $ TermResult (RCompiled $ UPLC._progTerm $ toNameless $ void $ getPlc c) []
   where
     toNameless ::
       UPLC.Program UPLC.NamedDeBruijn UPLC.DefaultUni UPLC.DefaultFun () ->
