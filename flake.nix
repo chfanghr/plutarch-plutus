@@ -11,10 +11,18 @@
     auto-optimise-store = "true";
   };
 
-  # FIXME: we need to think about what's going on here, both hci-effects and tooling
-  #        implement the same argument, I don't know how to solve this atm
-  inputs.tooling.url = "github:mlabs-haskell/mlabs-tooling.nix/mangoiv/fix-herculesCI-arg";
-
+  inputs = {
+    cardano-haskell-packages.url = "github:input-output-hk/cardano-haskell-packages?ref=repo";
+    cardano-haskell-packages.flake = false;
+    haskell-nix.url = "github:input-output-hk/haskell.nix";
+    # FIXME: we need to think about what's going on here, both hci-effects and tooling
+    #        implement the same argument, I don't know how to solve this atm
+    tooling = {
+      url = "github:mlabs-haskell/mlabs-tooling.nix/mangoiv/fix-herculesCI-arg";
+      inputs.cardano-haskell-packages.follows = "cardano-haskell-packages";
+      inputs.haskell-nix.follows = "haskell-nix";
+    };
+  };
 
   outputs = inputs@{ tooling, ... }: tooling.lib.mkFlake { inherit inputs; }
     ({ withSystem, ... }: {
